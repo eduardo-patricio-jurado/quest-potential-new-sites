@@ -12,12 +12,13 @@ Files of interest:
 - `src/detect_towers/cli.py` — simple command-line wrapper
 
 Quick start
-1. Create a virtualenv and install requirements:
+1. Create a virtualenv at the workspace root and install requirements:
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
+cd /workspaces/quest-potential-new-sites
+python -m venv venv
+source venv/bin/activate
+pip install -r data/requirements.txt  # or install minimal packages like Pillow for dataset scripts
 ```
 
 2. Run detection on an image (saves annotated image to `runs/detect`):
@@ -35,3 +36,22 @@ python -m detect_towers.cli measure --image path/to/image.jpg --model yolov8n.pt
 Notes & next steps:
 - For accurate meters-per-pixel you can compute scale from a known object visible in the image using `compute_scale_from_known_object`.
 - For automated satellite downloads consider integrating Google Earth Engine or manual exports from Google Earth Pro.
+
+Training
+- Provide a YOLO-format dataset YAML (example below) with `train` and `val` image folders and a `names` list mapping class IDs to labels.
+
+Example `data.yaml` (a ready-made sample is provided as `data/data.yaml` pointing at the `sample_dataset`):
+
+```yaml
+train: data/sample_dataset/images/train
+val: data/sample_dataset/images/val
+names: ["cell_tower", "billboard_tower"]
+```
+
+Run a training job (uses Ultralytics YOLOv8 API):
+
+```bash
+python -m detect_towers.train --data data.yaml --model yolov8n.pt --epochs 100 --imgsz 640 --batch 8 --project runs/train
+```
+
+The `train` script wraps `YOLO(model).train(...)` and saves results to the specified project folder.

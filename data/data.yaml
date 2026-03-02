@@ -1,0 +1,5 @@
+train: sample_dataset/images/train
+val: sample_dataset/images/val
+names:
+  - cell_tower
+  - billboard_tower
