@@ -1,16 +1,20 @@
-import sys
 import os
+import argparse
 import pandas as pd
 from dotenv import load_dotenv
-from .download import download_image
+from .download import download_image, download_image_with_radius, google_maps_link
 from .detect import detect_towers
 
 # Load environment variables from .env if present
 load_dotenv()
 
 
-def process_locations(file_path: str):
-    """Read Excel file and process each coordinate."""
+def process_locations(file_path: str, radius_m: float | None = None):
+    """Read Excel file and process each coordinate.
+
+    If `radius_m` is provided, a Static Maps image with the radius drawn will
+    also be downloaded and saved.
+    """
     df = pd.read_excel(file_path)
     # expecting columns 'latitude' and 'longitude'
     for idx, row in df.iterrows():
@@ -29,6 +33,22 @@ def process_locations(file_path: str):
             with open(filename, 'wb') as fh:
                 fh.write(img)
             print(f"Saved image to {filename}")
+
+            # print interactive Google Maps link
+            maps_url = google_maps_link(lat, lon)
+            print(f"Open in Google Maps: {maps_url}")
+
+            # optionally download an image with radius drawn
+            if radius_m:
+                try:
+                    rad_img = download_image_with_radius(lat, lon, radius_m)
+                    rad_filename = os.path.join('images', f"{lat_str}_{lon_str}_r{int(radius_m)}m.png")
+                    with open(rad_filename, 'wb') as fh:
+                        fh.write(rad_img)
+                    print(f"Saved radius image to {rad_filename}")
+                except Exception as re:
+                    print(f"Error downloading radius image: {re}")
+
             detection = detect_towers(img)
             print(f"Result: {detection}")
         except Exception as e:
@@ -36,10 +56,12 @@ def process_locations(file_path: str):
 
 
 if __name__ == '__main__':
-    if len(sys.argv) < 2:
-        print("Usage: python -m src.cli <locations.xlsx>")
-        sys.exit(1)
-    file_path = sys.argv[1]
+    parser = argparse.ArgumentParser(description='Process locations and download satellite images')
+    parser.add_argument('locations', help='Excel file with latitude and longitude columns')
+    parser.add_argument('--radius', type=float, default=None, help='Radius in meters to draw around each location')
+    args = parser.parse_args()
+
     if not os.environ.get('GOOGLE_API_KEY'):
         print('Warning: GOOGLE_API_KEY not set. Set it in your environment or in .env to download images.')
-    process_locations(file_path)
+
+    process_locations(args.locations, radius_m=args.radius)

@@ -35,9 +35,15 @@ Run the CLI tool:
 python -m src.cli path/to/locations.xlsx
 ```
 
-Output will print each location and detection result.  Extend the detection logic in `src/detect.py`.
+To also draw a radius (in meters) around each location and save that image, pass `--radius`:
 
-- Downloaded images are saved to the `images/` folder (created automatically).
+```bash
+python -m src.cli path/to/locations.xlsx --radius 200
+```
+
+Output will print each location, an interactive Google Maps link for the location, and detection result.  Extend the detection logic in `src/detect.py`.
+
+- Downloaded images are saved to the `images/` folder (created automatically).  Radius images are saved as `*_r{radius}m.png`.
 
 ## Project Structure
 
