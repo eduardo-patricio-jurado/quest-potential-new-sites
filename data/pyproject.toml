@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "detect-towers"
+version = "0.1.0"
+description = "Satellite tower detection using YOLO"
+requires-python = ">=3.8"
+dependencies = [
+    "ultralytics>=8.1.0",
+    "opencv-python-headless>=4.7.0",
+    "numpy>=1.25.0",
+    "Pillow>=10.0.0",
+    "matplotlib>=3.8.0",
+]
+
+[project.scripts]
+detect-towers = "detect_towers.cli:main"

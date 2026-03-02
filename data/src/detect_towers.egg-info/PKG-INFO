@@ -1,0 +1,10 @@
+Metadata-Version: 2.4
+Name: detect-towers
+Version: 0.1.0
+Summary: Satellite tower detection using YOLO
+Requires-Python: >=3.8
+Requires-Dist: ultralytics>=8.1.0
+Requires-Dist: opencv-python-headless>=4.7.0
+Requires-Dist: numpy>=1.25.0
+Requires-Dist: Pillow>=10.0.0
+Requires-Dist: matplotlib>=3.8.0
