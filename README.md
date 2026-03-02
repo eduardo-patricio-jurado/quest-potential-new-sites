@@ -37,6 +37,8 @@ python -m src.cli path/to/locations.xlsx
 
 Output will print each location and detection result.  Extend the detection logic in `src/detect.py`.
 
+- Downloaded images are saved to the `images/` folder (created automatically).
+
 ## Project Structure
 
 ```
