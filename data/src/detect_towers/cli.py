@@ -42,7 +42,7 @@ def cmd_map(args):
     pts = load_locations_from_file(args.input)
     plot_locations(pts, args.output, tiles=args.tiles, attr=args.attr, api_key=args.api_key)
 
-+
+
 def main():
     p = argparse.ArgumentParser(prog="detect_towers")
     sub = p.add_subparsers(dest="cmd")
