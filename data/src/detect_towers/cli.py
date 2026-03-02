@@ -37,9 +37,10 @@ def cmd_map(args):
     except ImportError:
         print("json module missing?")
         return
-    with open(args.input, "r") as f:
-        pts = json.load(f)
-    plot_locations(pts, args.output)
+    # auto-detect format
+    from .map import load_locations_from_file
+    pts = load_locations_from_file(args.input)
+    plot_locations(pts, args.output, tiles=args.tiles, attr=args.attr, api_key=args.api_key)
 
 +
 def main():
@@ -63,9 +64,15 @@ def main():
     # map command to plot latitude/longitude points with radius
     pmap = sub.add_parser("map")
     pmap.add_argument("--input", required=True,
-                      help="JSON file containing list of {lat,lon,radius,name?}")
+                      help="Path to JSON, CSV, or Excel file with columns lat, lon, radius, optional name")
     pmap.add_argument("--output", default="map.html",
                       help="Output HTML file (uses folium)")
+    pmap.add_argument("--tiles", default="OpenStreetMap",
+                      help="Tile URL or name (use Google template with key)")
+    pmap.add_argument("--attr", default=None,
+                      help="Attribution for custom tiles")
+    pmap.add_argument("--api-key", default=None,
+                      help="API key for tile service if required (e.g. Google)")
     pmap.set_defaults(func=cmd_map)
 
     args = p.parse_args()

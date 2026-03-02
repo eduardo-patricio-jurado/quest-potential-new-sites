@@ -4,3 +4,4 @@ numpy>=1.25.0
 Pillow>=10.0.0
 matplotlib>=3.8.0
 folium>=0.18.0
+pandas>=2.2.0

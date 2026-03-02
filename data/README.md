@@ -33,7 +33,7 @@ python -m detect_towers.cli detect --image path/to/image.jpg --model yolov8n.pt 
 python -m detect_towers.cli map --input locations.json --output towers_map.html
 ```
 
-`locations.json` should be a list of objects with `lat`, `lon`, `radius` (meters), and optional `name`.
+`locations.json` (or CSV/Excel) should be a list/table with columns `lat`, `lon`, `radius` (meters) and optional `name`.
 
 Example:
 ```json
@@ -42,6 +42,15 @@ Example:
   {"lat":39.9, "lon":-105.2, "radius":30}
 ]
 ```
+
+By default the map uses OpenStreetMap tiles. To use Google Maps (or another service) pass a tile URL template and your API key, e.g.:
+
+```bash
+python -m detect_towers.cli map --input locations.json --tiles "https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}&key={key}" \
+    --api-key YOUR_GOOGLE_KEY --output google_map.html
+```
+
+Note that Google requires an API key and billing enabled for its service.
 
 4. Convert detections to real-world sizes by providing `--meters-per-pixel`:
 
