@@ -1,0 +1,5 @@
+pandas
+openpyxl
+requests
+opencv-python-headless
+numpy
