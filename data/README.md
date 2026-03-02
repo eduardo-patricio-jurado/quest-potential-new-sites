@@ -7,9 +7,9 @@ Key ideas:
 - Provide measurement helpers that convert pixel sizes to meters using a user-supplied scale or a known reference object.
 
 Files of interest:
-- `requirements.txt` — Python dependencies
-- `src/detect_towers/` — detection and measurement modules
-- `src/detect_towers/cli.py` — simple command-line wrapper
+- `requirements.txt` — Python dependencies (includes folium for mapping)
+- `src/detect_towers/` — detection, measurement, and mapping modules
+- `src/detect_towers/cli.py` — simple command-line wrapper with `detect`, `measure`, `train`, and `map` commands
 
 Quick start
 1. Create a virtualenv at the workspace root and install requirements:
@@ -25,6 +25,28 @@ pip install -r data/requirements.txt  # or install minimal packages like Pillow 
 
 ```bash
 python -m detect_towers.cli detect --image path/to/image.jpg --model yolov8n.pt --save-dir runs/detect
+```
+
+3. Plot geolocated points on a map with radius overlays:
+
+```bash
+python -m detect_towers.cli map --input locations.json --output towers_map.html
+```
+
+`locations.json` should be a list of objects with `lat`, `lon`, `radius` (meters), and optional `name`.
+
+Example:
+```json
+[
+  {"lat":40.0, "lon":-105.3, "radius":50, "name":"Tower A"},
+  {"lat":39.9, "lon":-105.2, "radius":30}
+]
+```
+
+4. Convert detections to real-world sizes by providing `--meters-per-pixel`:
+
+```bash
+python -m detect_towers.cli measure --image path/to/image.jpg --model yolov8n.pt --meters-per-pixel 0.2
 ```
 
 3. Convert detections to real-world sizes by providing `--meters-per-pixel`:

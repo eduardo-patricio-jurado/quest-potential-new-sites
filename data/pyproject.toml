@@ -13,7 +13,14 @@ dependencies = [
     "numpy>=1.25.0",
     "Pillow>=10.0.0",
     "matplotlib>=3.8.0",
+    "folium>=0.18.0",
 ]
 
 [project.scripts]
 detect-towers = "detect_towers.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]

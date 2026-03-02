@@ -30,6 +30,18 @@ def cmd_measure(args):
     print(json.dumps(measured, indent=2))
 
 
+def cmd_map(args):
+    from .map import plot_locations
+    try:
+        import json
+    except ImportError:
+        print("json module missing?")
+        return
+    with open(args.input, "r") as f:
+        pts = json.load(f)
+    plot_locations(pts, args.output)
+
++
 def main():
     p = argparse.ArgumentParser(prog="detect_towers")
     sub = p.add_subparsers(dest="cmd")
@@ -47,6 +59,14 @@ def main():
     pm.add_argument("--conf", type=float, default=0.25)
     pm.add_argument("--meters-per-pixel", type=float, default=None)
     pm.set_defaults(func=cmd_measure)
+
+    # map command to plot latitude/longitude points with radius
+    pmap = sub.add_parser("map")
+    pmap.add_argument("--input", required=True,
+                      help="JSON file containing list of {lat,lon,radius,name?}")
+    pmap.add_argument("--output", default="map.html",
+                      help="Output HTML file (uses folium)")
+    pmap.set_defaults(func=cmd_map)
 
     args = p.parse_args()
     if not hasattr(args, "func"):

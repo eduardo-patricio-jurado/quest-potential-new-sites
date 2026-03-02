@@ -1,8 +1,10 @@
 README.md
 pyproject.toml
+setup.py
 src/detect_towers/__init__.py
 src/detect_towers/cli.py
 src/detect_towers/detect.py
+src/detect_towers/map.py
 src/detect_towers/measure.py
 src/detect_towers/train.py
 src/detect_towers.egg-info/PKG-INFO

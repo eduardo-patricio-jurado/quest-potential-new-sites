@@ -1,0 +1,4 @@
+[
+  {"lat":40.0, "lon":-105.3, "radius":500, "name":"Tower A"},
+  {"lat":39.9, "lon":-105.2, "radius":300, "name":"Tower B"}
+]
