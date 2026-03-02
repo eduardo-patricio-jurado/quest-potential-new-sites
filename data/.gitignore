@@ -1,0 +1,7 @@
+venv/
+.venv/
+__pycache__/
+runs/
+*.pyc
+*.pkl
+*.sqlite3

@@ -12,17 +12,29 @@ load_dotenv()
 def process_locations(file_path: str, radius_m: float | None = None):
     """Read Excel file and process each coordinate.
 
-    If `radius_m` is provided, a Static Maps image with the radius drawn will
-    also be downloaded and saved.
+    If the spreadsheet contains a column named `radius` it is interpreted as a
+    meter value and used for that row. Otherwise `radius_m` from the command
+    line (or `None`) is used.
     """
     df = pd.read_excel(file_path)
-    # expecting columns 'latitude' and 'longitude'
+    # expecting columns 'latitude' and 'longitude'; optional 'radius'
     for idx, row in df.iterrows():
         lat = row.get('latitude')
         lon = row.get('longitude')
         if pd.isna(lat) or pd.isna(lon):
             continue
-        print(f"Processing {lat}, {lon}")
+        # determine radius for this row
+        row_radius = None
+        if 'radius' in df.columns:
+            val = row.get('radius')
+            if not pd.isna(val):
+                try:
+                    row_radius = float(val)
+                except Exception:
+                    print(f"Warning: invalid radius value '{val}' at row {idx}, ignoring")
+        radius_to_use = row_radius if row_radius is not None else radius_m
+
+        print(f"Processing {lat}, {lon} (radius={radius_to_use})")
         try:
             img = download_image(lat, lon)
             # ensure images directory exists and save the downloaded image
@@ -39,10 +51,10 @@ def process_locations(file_path: str, radius_m: float | None = None):
             print(f"Open in Google Maps: {maps_url}")
 
             # optionally download an image with radius drawn
-            if radius_m:
+            if radius_to_use:
                 try:
-                    rad_img = download_image_with_radius(lat, lon, radius_m)
-                    rad_filename = os.path.join('images', f"{lat_str}_{lon_str}_r{int(radius_m)}m.png")
+                    rad_img = download_image_with_radius(lat, lon, radius_to_use)
+                    rad_filename = os.path.join('images', f"{lat_str}_{lon_str}_r{int(radius_to_use)}m.png")
                     with open(rad_filename, 'wb') as fh:
                         fh.write(rad_img)
                     print(f"Saved radius image to {rad_filename}")

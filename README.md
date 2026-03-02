@@ -28,6 +28,8 @@ This Python project downloads Google Earth imagery for given latitude/longitude 
 ## Usage
 
 Prepare an Excel file with at least two columns named `latitude` and `longitude`.
+You may also include an optional `radius` column (meters) to specify a different
+radius per location; otherwise provide `--radius` on the command line.
 
 Run the CLI tool:
 
