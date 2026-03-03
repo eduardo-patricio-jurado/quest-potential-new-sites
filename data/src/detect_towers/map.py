@@ -10,32 +10,32 @@ def load_locations_from_file(path: str) -> List[Dict]:
     `radius`. An optional `name` column may be present.
     """
     import os
-+    ext = os.path.splitext(path)[1].lower()
-+    if ext in (".json",):
-+        import json
-+        with open(path, "r") as f:
-+            return json.load(f)
-+    else:
-+        # use pandas for tabular formats
-+        try:
-+            import pandas as pd
-+        except ImportError:
-+            raise ImportError("pandas required to read CSV/Excel files")
-+        if ext in (".csv",):
-+            df = pd.read_csv(path)
-+        elif ext in (".xls", ".xlsx", ".xlsm", ".odf", ".ods", ".odt"):
-+            df = pd.read_excel(path)
-+        else:
-+            raise ValueError(f"Unsupported file extension: {ext}")
-+        # ensure necessary columns exist
-+        for col in ("lat", "lon", "radius"):
-+            if col not in df.columns:
-+                raise ValueError(f"Missing required column '{col}' in {path}")
-+        records = df.to_dict(orient="records")
-+        return records
-+
-+
-+def plot_locations(locations: List[Dict], output: str = "map.html", start_zoom: int = 12, tiles: str = "OpenStreetMap", attr: Optional[str] = None, api_key: Optional[str] = None) -> None:
+    ext = os.path.splitext(path)[1].lower()
+    if ext in (".json",):
+        import json
+        with open(path, "r") as f:
+            return json.load(f)
+    else:
+        # use pandas for tabular formats
+        try:
+            import pandas as pd
+        except ImportError:
+            raise ImportError("pandas required to read CSV/Excel files")
+        if ext in (".csv",):
+            df = pd.read_csv(path)
+        elif ext in (".xls", ".xlsx", ".xlsm", ".odf", ".ods", ".odt"):
+            df = pd.read_excel(path)
+        else:
+            raise ValueError(f"Unsupported file extension: {ext}")
+        # ensure necessary columns exist
+        for col in ("lat", "lon", "radius"):
+            if col not in df.columns:
+                raise ValueError(f"Missing required column '{col}' in {path}")
+        records = df.to_dict(orient="records")
+        return records
+
+
+def plot_locations(locations: List[Dict], output: str = "map.html", start_zoom: int = 12, tiles: str = "OpenStreetMap", attr: Optional[str] = None, api_key: Optional[str] = None) -> None:
     """Create an HTML map with circles for each location.
 
     `locations` is a list of dicts with keys:
