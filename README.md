@@ -27,9 +27,13 @@ This Python project downloads Google Earth imagery for given latitude/longitude 
 
 ## Usage
 
-Prepare an Excel file with at least two columns named `latitude` and `longitude`.
-You may also include an optional `radius` column (meters) to specify a different
-radius per location; otherwise provide `--radius` on the command line.
+Prepare an Excel/CSV/JSON file with at least latitude and longitude.
+The loader understands either `lat`/`lon` or `latitude`/`longitude` column names
+(case doesn’t matter).  You also need a radius column – it can be named
+`radius` or any name containing "radius".  If you use kilometers (e.g. a
+`radius_km` column) the values will be converted to metres automatically.  Any
+extra fields such as `id`, `name` or `tower_date` are preserved and can be
+shown in the popups.
 
 Run the CLI tool:
 

@@ -1,4 +1,12 @@
-"""Utilities for plotting coordinates on a map."""
+"""Utilities for plotting coordinates on a map.
+
+The loader is forgiving about column names: you can use ``lat``/``lon`` or
+``latitude``/``longitude`` (case‑insensitive).  The radius column may be
+named ``radius`` or anything containing the word "radius"; ``radius_km`` is
+also supported, and its values will be converted to metres automatically.
+Additional columns (e.g. ``id`` or ``name``) are preserved in the returned
+records and may be used for popups or further processing.
+"""
 from typing import List, Dict, Optional
 import folium
 
@@ -21,17 +29,52 @@ def load_locations_from_file(path: str) -> List[Dict]:
             import pandas as pd
         except ImportError:
             raise ImportError("pandas required to read CSV/Excel files")
+
         if ext in (".csv",):
             df = pd.read_csv(path)
         elif ext in (".xls", ".xlsx", ".xlsm", ".odf", ".ods", ".odt"):
             df = pd.read_excel(path)
         else:
             raise ValueError(f"Unsupported file extension: {ext}")
-        # ensure necessary columns exist
-        for col in ("lat", "lon", "radius"):
-            if col not in df.columns:
-                raise ValueError(f"Missing required column '{col}' in {path}")
-        records = df.to_dict(orient="records")
+
+        # normalize columns to lowercase to help with synonyms
+        df.columns = [c.lower() for c in df.columns]
+
+        # locate latitude/longitude columns (support various names)
+        lat_col = next((c for c in df.columns if c in ("lat", "latitude")), None)
+        lon_col = next((c for c in df.columns if c in ("lon", "longitude", "lng")), None)
+        if lat_col is None or lon_col is None:
+            raise ValueError(f"Missing required lat/lon columns in {path}."
+                             " Use 'lat'/'lon' or 'latitude'/'longitude'.")
+
+        # find a radius column; prefer explicit 'radius', then look for something with 'radius' in the name
+        radius_col = None
+        for cand in df.columns:
+            if cand == "radius":
+                radius_col = cand
+                break
+            if "radius" in cand:
+                radius_col = cand
+        if radius_col is None:
+            raise ValueError(f"Missing required radius column in {path}."
+                             " Column name should include the word 'radius'.")
+
+        records = []
+        for _, row in df.iterrows():
+            lat = row[lat_col]
+            lon = row[lon_col]
+            rad = row[radius_col]
+            # convert from km to meters if the column name suggests it
+            if "km" in radius_col:
+                rad = float(rad) * 1000
+            # cast to float (pandas may use numpy types)
+            records.append({
+                "lat": float(lat),
+                "lon": float(lon),
+                "radius": float(rad),
+                # preserve any other fields (name, id, etc.) for potential use
+                **{k: v for k, v in row.items() if k not in (lat_col, lon_col, radius_col)}
+            })
         return records
 
 
