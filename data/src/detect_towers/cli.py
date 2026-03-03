@@ -49,11 +49,23 @@ def cmd_map(args):
         from .map import plot_locations
         # auto-detect format
         from .map import load_locations_from_file
+
+        # ensure input exists before proceeding
+        if not Path(args.input).exists():
+            raise FileNotFoundError(args.input)
+
         pts = load_locations_from_file(args.input)
+
+        # ensure output directory exists
+        out_path = Path(args.output)
+        if out_path.parent and not out_path.parent.exists():
+            out_path.parent.mkdir(parents=True, exist_ok=True)
+
         plot_locations(pts, args.output, tiles=args.tiles, attr=args.attr, api_key=args.api_key)
     except FileNotFoundError as e:
-        logger.exception("map input file not found")
-        print(f"Input file not found: {e}", file=sys.stderr)
+        # distinguish between input missing and output directory issues
+        logger.exception("map file not found")
+        print(f"File not found: {e}", file=sys.stderr)
     except Exception as e:
         logger.exception("map command failed")
         print(f"Error running map: {e}", file=sys.stderr)
