@@ -6,41 +6,57 @@ Usage examples:
 """
 import argparse
 import json
+import logging
+import sys
 from pathlib import Path
 
 from .detect import detect
 from .measure import measure_bboxes, compute_scale_from_known_object, estimate_height_from_shadow
 
+# configure simple logging for CLI
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
+logger = logging.getLogger("detect_towers")
+
 
 def cmd_detect(args):
-    dets = detect(args.image, model=args.model, conf=args.conf, save=True, save_dir=args.save_dir)
-    out_path = Path(args.save_dir) / "detections.json"
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-    with open(out_path, "w") as f:
-        json.dump(dets, f, indent=2)
-    print(f"Wrote {len(dets)} detections to {out_path}")
+    try:
+        dets = detect(args.image, model=args.model, conf=args.conf, save=True, save_dir=args.save_dir)
+        out_path = Path(args.save_dir) / "detections.json"
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(out_path, "w") as f:
+            json.dump(dets, f, indent=2)
+        print(f"Wrote {len(dets)} detections to {out_path}")
+    except Exception as e:
+        logger.exception("detect command failed")
+        print(f"Error running detect: {e}", file=sys.stderr)
 
 
 def cmd_measure(args):
-    dets = detect(args.image, model=args.model, conf=args.conf, save=False)
-    if args.meters_per_pixel is None:
-        print("meters-per-pixel is required for measurement. Either pass --meters-per-pixel or compute it from a known object.")
-        return
-    measured = measure_bboxes(dets, args.meters_per_pixel)
-    print(json.dumps(measured, indent=2))
+    try:
+        dets = detect(args.image, model=args.model, conf=args.conf, save=False)
+        if args.meters_per_pixel is None:
+            print("meters-per-pixel is required for measurement. Either pass --meters-per-pixel or compute it from a known object.")
+            return
+        measured = measure_bboxes(dets, args.meters_per_pixel)
+        print(json.dumps(measured, indent=2))
+    except Exception as e:
+        logger.exception("measure command failed")
+        print(f"Error running measure: {e}", file=sys.stderr)
 
 
 def cmd_map(args):
-    from .map import plot_locations
     try:
-        import json
-    except ImportError:
-        print("json module missing?")
-        return
-    # auto-detect format
-    from .map import load_locations_from_file
-    pts = load_locations_from_file(args.input)
-    plot_locations(pts, args.output, tiles=args.tiles, attr=args.attr, api_key=args.api_key)
+        from .map import plot_locations
+        # auto-detect format
+        from .map import load_locations_from_file
+        pts = load_locations_from_file(args.input)
+        plot_locations(pts, args.output, tiles=args.tiles, attr=args.attr, api_key=args.api_key)
+    except FileNotFoundError as e:
+        logger.exception("map input file not found")
+        print(f"Input file not found: {e}", file=sys.stderr)
+    except Exception as e:
+        logger.exception("map command failed")
+        print(f"Error running map: {e}", file=sys.stderr)
 
 
 def main():
@@ -83,4 +99,8 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception:
+        logger.exception("Unhandled exception in CLI")
+        sys.exit(1)
